@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Airbus × Tsinghua - Cabin Preference Study 2026</title>
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700&f[]=clash-display@400,500,600,700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --navy:#00205b;--navy2:#091530;--sky:#00a3e0;--sky2:#0078b4;
+  --amber:#e07b39;--amber2:#b55e25;
+  --silver:rgba(255,255,255,.1);--silver2:rgba(255,255,255,.18);
+  --offwhite:#0d1b3e;
+  --ink:#ffffff;--ink2:rgba(255,255,255,.82);--ink3:rgba(255,255,255,.45);
+  --card-bg:rgba(255,255,255,.06);--card-border:rgba(255,255,255,.1);
+  --font-d:'Clash Display','PingFang SC',sans-serif;
+  --font-b:'Satoshi','PingFang SC',sans-serif;
+  --ease:cubic-bezier(0.16,1,0.3,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-snap-type:y mandatory;scroll-behavior:smooth;background:#0d1b3e}
+body{font-family:var(--font-b);color:#fff;overflow-x:hidden;background:#0d1b3e}
+#bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--sky),var(--amber));width:0%;z-index:200;transition:width .2s}
+#nav{position:fixed;right:18px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:7px;z-index:199}
+.nd{width:5px;height:5px;border-radius:50%;background:rgba(0,32,91,.2);cursor:pointer;transition:all .3s var(--ease)}
+.nd.on{background:var(--sky);transform:scale(1.7)}
+.slide{min-height:100vh;scroll-snap-align:start;display:flex;flex-direction:column;justify-content:center;padding:3rem clamp(1.5rem,5.5vw,5rem);position:relative;overflow:hidden;background:#f0f2f5}
+.r{opacity:0;transform:translateY(18px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.r.on{opacity:1;transform:none}
+.r:nth-child(1){transition-delay:.02s}.r:nth-child(2){transition-delay:.06s}.r:nth-child(3){transition-delay:.10s}
+.r:nth-child(4){transition-delay:.14s}.r:nth-child(5){transition-delay:.18s}.r:nth-child(6){transition-delay:.22s}
+.r:nth-child(7){transition-delay:.26s}.r:nth-child(8){transition-delay:.30s}.r:nth-child(9){transition-delay:.34s}
+@media(max-width:768px){.g2,.g3{grid-template-columns:1fr!important}#nav{display:none}.slide{padding:2.5rem 1.2rem}}
+
+/* Wing bg */
+.wbg{position:absolute;right:-4%;bottom:-4%;width:52%;opacity:.06;pointer-events:none}
+.wbg2{position:absolute;left:-6%;top:50%;transform:translateY(-50%);width:38%;opacity:.05;pointer-events:none}
+
+/* Layout */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;align-items:start}
+.g2-37{display:grid;grid-template-columns:3fr 4fr;gap:1.6rem;align-items:start}
+.g2-57{display:grid;grid-template-columns:5fr 7fr;gap:1.6rem;align-items:start}
+
+/* Typography */
+.ey{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#0078b4;font-weight:500;margin-bottom:.45rem}
+.st{font-family:var(--font-d);font-size:clamp(1.65rem,2.8vw,2.5rem);font-weight:600;color:#0a1628;line-height:1.12;margin-bottom:.4rem}
+.sd{font-size:.84rem;color:#5a6880;max-width:58ch;line-height:1.75;margin-bottom:1.3rem}
+.nt{font-size:.71rem;color:#8a9ab0;font-style:italic;margin-top:.3rem;line-height:1.5}
+
+/* Cards */
+.cd{background:#ffffff;border:1px solid #dde2ea;border-radius:6px;padding:1rem 1.2rem}
+.cn{border-top:3px solid var(--navy)}.cs{border-top:3px solid var(--sky)}
+.cg{border-top:3px solid var(--amber)}.ct{border-top:3px solid var(--amber)}.cr{border-top:3px solid #c0392b}
+.ctit{font-size:12px;letter-spacing:.04em;color:#6b7a90;margin-bottom:.7rem;font-weight:500}
+.ki{font-size:clamp(1.02rem,1.8vw,1.2rem);font-weight:600;color:#0a1628;line-height:1.45;margin:.35rem 0 1.1rem;max-width:62ch;border-left:3px solid var(--sky);padding-left:.75rem}
+.cw{position:relative;width:100%}
+
+/* KV */
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:1px;background:#dde2ea;border:1px solid #dde2ea;border-radius:4px;overflow:hidden}
+.kvc{background:#fff;padding:.8rem .9rem}
+.kvn{font-family:var(--font-d);font-size:1.5rem;font-weight:600;color:#00205b}
+.kvl{font-size:10px;color:#8a9ab0;margin-top:1px}
+
+/* Cover */
+#s1{background:#091530;background-image:radial-gradient(circle,rgba(255,255,255,.07) 1px,transparent 1px);background-size:24px 24px;padding-top:4.5rem;padding-bottom:3rem}
+#s1::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--sky) 0%,var(--amber) 50%,transparent 100%)}
+.abadge{width:40px;height:40px;background:var(--sky);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cvT{font-family:var(--font-d);font-size:clamp(2.6rem,4.8vw,4.2rem);font-weight:600;line-height:1.08;color:#fff;max-width:16ch;margin:.8rem 0 .5rem}
+.cvS{font-size:.93rem;color:rgba(255,255,255,.5);max-width:44ch;line-height:1.75}
+.cvL{width:40px;height:2px;background:linear-gradient(90deg,var(--sky),var(--amber));margin:1.6rem 0}
+.cvM{font-size:10px;color:rgba(255,255,255,.28);letter-spacing:.06em}
+.cvStat{display:flex;gap:2.5rem;margin-top:auto;padding-top:2.3rem;border-top:1px solid rgba(255,255,255,.08)}
+.csn{font-family:var(--font-d);font-size:1.85rem;font-weight:600;color:var(--sky)}
+.csl{font-size:11px;color:rgba(255,255,255,.38);margin-top:1px}
+
+/* Section covers */
+.ss{background:#091530;background-image:radial-gradient(circle,rgba(255,255,255,.07) 1px,transparent 1px);background-size:20px 20px}
+.ss::before{content:'';position:absolute;right:-10%;top:0;width:55%;height:100%;background:rgba(0,163,224,.07);clip-path:polygon(28% 0,100% 0,100% 100%,0% 100%)}
+.ssn{font-family:var(--font-d);font-size:8rem;font-weight:700;color:rgba(255,255,255,.04);line-height:1;margin-bottom:-1.6rem;position:relative;z-index:1}
+.ssT{font-family:var(--font-d);font-size:clamp(1.9rem,3.8vw,3.2rem);font-weight:600;color:#fff;line-height:1.12;max-width:15ch;position:relative;z-index:1;text-shadow:0 2px 24px rgba(0,0,0,.4)}
+.ssl{width:36px;height:2px;background:linear-gradient(90deg,var(--sky),var(--amber));margin:.9rem 0;position:relative;z-index:1}
+.ss .ey{color:rgba(0,163,224,.7)!important}
+.ss .ssd{color:rgba(255,255,255,.45)}
+.ssd{font-size:.86rem;color:rgba(255,255,255,.45);max-width:38ch;line-height:1.7;position:relative;z-index:1}
+
+/* Persona specific */
+.persona{background:#fff;border:1px solid #dde2ea;border-radius:6px;overflow:hidden}
+.ph{padding:1rem 1.2rem .85rem;border-bottom:1px solid #eaeef3}
+.pbadge{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;padding:2px 8px;border-radius:2px;display:inline-block;margin-bottom:.45rem}
+.eco .pbadge{background:rgba(0,32,91,.07);color:#00205b}
+.prem .pbadge{background:rgba(0,163,224,.1);color:#0078b4}
+.biz .pbadge{background:rgba(224,123,57,.12);color:#b55e25}
+.pname{font-family:var(--font-d);font-size:1.05rem;font-weight:600;color:#0a1628}
+.psub{font-size:.74rem;color:#8a9ab0;margin-top:2px}
+.pb{padding:.75rem 1.2rem 1rem}
+.pr{display:flex;justify-content:space-between;align-items:flex-start;padding:.33rem 0;border-bottom:1px solid #eaeef3;font-size:.76rem}
+.pr:last-child{border-bottom:none}
+.prk{color:#8a9ab0}.prv{color:#1a2d52;font-weight:500;text-align:right;max-width:56%}
+.hi{color:#0078b4;font-weight:600}.hi-g{color:#0078b4;font-weight:600}.hi-t{color:#b55e25;font-weight:600}
+
+/* Insight */
+.ib{background:rgba(0,120,180,.05);border:1px solid rgba(0,120,180,.12);border-left:3px solid var(--sky);border-radius:0 4px 4px 0;padding:.85rem 1rem;margin-top:1.1rem;font-size:.81rem;color:#2a3a50;line-height:1.65}
+.ib strong{color:#0056a0;font-weight:600}
+.ib-g{background:rgba(224,123,57,.06);border-color:rgba(224,123,57,.15);border-left-color:var(--amber)}
+.ib-g strong{color:#a05020}
+.ib-n{background:rgba(0,120,180,.05);border-color:rgba(0,120,180,.12);border-left-color:var(--sky)}
+.ib-n strong{color:#0056a0}
+.ib-t{background:rgba(224,123,57,.06);border-color:rgba(224,123,57,.15);border-left-color:var(--amber)}
+.ib-t strong{color:#a05020}
+
+/* Heat cells */
+.heat-table{width:100%;border-collapse:collapse;font-size:.75rem;color:#1a2d52}
+.heat-table th{padding:.45rem .6rem;text-align:left;font-size:9.5px;letter-spacing:.06em;color:rgba(255,255,255,.85);font-weight:500;background:#00205b}
+.heat-table td{padding:.42rem .6rem;border:1px solid #dde2ea;text-align:center;font-weight:500;color:#1a2d52}
+.heat-table td:first-child{text-align:left;color:#4a5a70;font-weight:400;background:#f7f8fa}
+.h5{background:#00205b;color:#fff}.h4{background:#0078b4;color:#fff}
+.h3{background:#b8d9f0;color:#003d6e}.h2{background:#deeef8;color:#1a5070}.h1{background:#f3f6f9;color:#8a9ab0}
+.up{color:#007a60;font-size:10px;font-weight:600}
+.dn{color:#c0392b;font-size:10px;font-weight:600}
+.eq{color:#8a9ab0;font-size:10px}
+
+/* Finding */
+.fi{display:flex;gap:.9rem;padding:.85rem 0;border-bottom:1px solid #dde2ea}
+.fi:last-child{border-bottom:none}
+.fn{font-family:var(--font-d);font-size:1.6rem;font-weight:600;color:#c8d4e0;line-height:1;flex-shrink:0;width:1.9rem;padding-top:1px}
+.ft{font-size:.88rem;font-weight:600;color:#0a1628;margin-bottom:2px}
+.fd{font-size:.78rem;color:#5a6880;line-height:1.62}
+
+/* Tag */
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 8px;border-radius:2px;font-weight:500}
+.tag-n{background:rgba(0,32,91,.07);color:#00205b}
+.tag-g{background:rgba(224,123,57,.1);color:#a05020}
+.tag-t{background:rgba(0,122,96,.08);color:#005a40}
+.tag-r{background:rgba(192,57,43,.08);color:#8b1a10}
+.tag-s{background:rgba(0,120,200,.1);color:#0056a0}
+
+/* Year compare */
+.yr16{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 8px;border-radius:2px;background:rgba(122,128,144,.1);color:var(--ink3);font-weight:500}
+.yr26{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 8px;border-radius:2px;background:rgba(0,163,224,.1);color:var(--sky2);font-weight:500}
+
+/* Grid Recommendation Styles */
+.rec-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+.rec-card {
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #dde2ea;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 32, 91, 0.03);
+}
+.rec-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+.rec-title {
+  font-family: var(--font-d);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #0a1628;
+}
+.rec-item {
+  margin-bottom: 0.85rem;
+  font-size: 0.83rem;
+  line-height: 1.6;
+  color: #4a5a70;
+}
+.rec-item strong {
+  color: #0a1628;
+  font-weight: 600;
+}
+
+/* End */
+#s_end{background:#091530;background-image:radial-gradient(circle,rgba(255,255,255,.07) 1px,transparent 1px);background-size:20px 20px}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<nav id="nav"></nav>
+
+<!-- ═══ S1 封面 ═══ -->
+<section class="slide" id="s1">
+  <svg class="wbg" viewBox="0 0 600 400" fill="none">
+    <path d="M600 200L0 380V320L500 140Z" fill="white"/>
+    <path d="M600 200L100 400H0L550 170Z" fill="white" opacity=".45"/>
+    <path d="M600 200L200 20H300L600 180Z" fill="white" opacity=".25"/>
+  </svg>
+  <div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.8rem" class="r">
+      <div class="abadge"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M2 14L22 8L20 12L8 16Z" fill="white"/><path d="M2 14L10 18L8 16Z" fill="white" opacity=".55"/></svg></div>
+      <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.4)">Airbus × Tsinghua University · EMBA Business Analytics</span>
+    </div>
+    <h1 class="cvT r">中国航空旅客<br>客舱服务偏好<br>与核心破局点研究</h1>
+    <p class="cvS r">聚焦核心痛点: 解决超经“嫌贵”与“不值”之困<br>十载心智跨越对比 · 2026年最新商业分析白皮书报告与Presentation</p>
+    <div class="cvL r"></div>
+    <p class="cvM r">China Cabin Preference Study 2026 · n=300 · May 2026</p>
+  </div>
+  <div class="cvStat r">
+    <div><div class="csn">300</div><div class="csl">高保真样本</div></div>
+    <div><div class="csn">3类</div><div class="csl">重塑客群画像</div></div>
+    <div><div class="csn">3个</div><div class="csl">关键航线细分</div></div>
+    <div><div class="csn">10年</div><div class="csl">纵向跨度追踪</div></div>
+  </div>
+  <div class="r" style="margin-top:1.8rem;padding-top:1.8rem;border-top:1px solid rgba(255,255,255,.08);display:flex;gap:3.5rem;align-items:flex-end">
+    <div>
+      <div style="font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:.45rem">汇报团队</div>
+      <div style="font-family:'Clash Display','PingFang SC',sans-serif;font-size:1.05rem;font-weight:600;color:#fff;letter-spacing:.02em">赵婧怡 &nbsp;·&nbsp; 欧子聪 &nbsp;·&nbsp; 吴哲维</div>
+    </div>
+    <div>
+      <div style="font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:.45rem">评阅专家</div>
+      <div style="font-size:.88rem;color:rgba(255,255,255,.55)">李敏 教授 &nbsp;·&nbsp; Airbus智能团队</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S2 项目背景与宏观趋势 ═══ -->
+<section class="slide" id="s2">
+  <p class="ey r">项目背景与市场大势</p>
+  <h2 class="st r">2026中国商旅市场的历史性迁徙</h2>
+  <p class="ki r">全社会消费心智步入“极度理性时代”——大厂和国企预算缩减但个人对舒适的底线不降，倒逼航空业必须依靠产品创新破局。</p>
+  <div class="g2 r" style="margin-top:.8rem">
+    <div class="cd cn">
+      <div class="ctit" style="color:var(--navy);font-weight:600">十年来的航空消费逻辑迁徙 (2016 vs 2026)</div>
+      <div style="display:flex;flex-direction:column;gap:1rem;margin-top:0.8rem">
+        <div style="display:flex;gap:0.8rem">
+          <div style="background:rgba(0,32,91,0.05);padding:0.4rem;border-radius:4px;font-weight:600;color:var(--navy);font-size:0.8rem;height:fit-content">2016</div>
+          <p style="font-size:0.8rem;color:#4a5a70;line-height:1.5"><strong>中产溢价红利期</strong>：居民人均可支配收入快速跑赢GDP，乘客愿意为身份溢价和“大面子”买单，大众对新型客舱（超经）处于盲目向往的科普接受阶段。</p>
+        </div>
+        <div style="display:flex;gap:0.8rem">
+          <div style="background:rgba(0,163,224,0.1);padding:0.4rem;border-radius:4px;font-weight:600;color:var(--sky);font-size:0.8rem;height:fit-content">2026</div>
+          <p style="font-size:0.8rem;color:#4a5a70;line-height:1.5"><strong>精算务实成熟期</strong>：面临企业差旅报销严控与个人腰包理性，高端两舱受阻。但高频飞客对基本硬体环境的诉求绝对没有降级，市场急需一款“去溢价、得体、高舒适”的物理缓冲舱位。</p>
+        </div>
+      </div>
+    </div>
+    <div class="cd cs">
+      <div class="ctit" style="color:var(--sky2);font-weight:600">空客与学界的四个核心研究课题</div>
+      <div style="display:flex;flex-direction:column;gap:1rem;margin-top:0.8rem">
+        <div style="display:flex;align-items:center;gap:0.8rem;font-size:0.8rem;color:#4a5a70"><span style="width:20px;height:20px;border-radius:50%;background:#ddeecf;color:#27500a;display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:0.75rem">1</span>重构三类受访者的真实画像，规避舱位同名混淆缺陷。</div>
+        <div style="display:flex;align-items:center;gap:0.8rem;font-size:0.8rem;color:#4a5a70"><span style="width:20px;height:20px;border-radius:50%;background:#deeef8;color:#0c447c;display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:0.75rem">2</span>诊断超级经济舱“价格嫌太贵”与“体验嫌太水”的底盘矛盾。</div>
+        <div style="display:flex;align-items:center;gap:0.8rem;font-size:0.8rem;color:#4a5a70"><span style="width:20px;height:20px;border-radius:50%;background:#faece7;color:#712b13;display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:0.75rem">3</span>解析国内、短途国际与长途国际的精准增值支付意愿。</div>
+        <div style="display:flex;align-items:center;gap:0.8rem;font-size:0.8rem;color:#4a5a70"><span style="width:20px;height:20px;border-radius:50%;background:#f1efe8;color:#444441;display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:0.75rem">4</span>锁定真正决定转化的“单点极致硬核服务”，摒弃一切虚浮溢价。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S3 核心直达：重大商业洞察先声夺人 ═══ -->
+<section class="slide" id="s3">
+  <p class="ey r">核心洞察先声夺人</p>
+  <h2 class="st r">本次2026年调研三大颠覆性Insight</h2>
+  <p class="ki r">高级航海家不应该看复杂的交错数据：我们最核心的三条发现，在第一页就为你毫无保留地揭晓。</p>
+  <div class="g3 r" style="margin-top:.8rem">
+    <div class="cd cn" style="height:280px;display:flex;flex-direction:column;justify-content:space-between">
+      <div>
+        <div style="background:rgba(0,32,91,0.06);color:var(--navy);font-size:10px;font-weight:600;padding:2px 8px;border-radius:2px;width:fit-content;margin-bottom:0.8rem">FINDING 01</div>
+        <h4 style="font-family:var(--font-d);font-size:1.05rem;line-height:1.4;color:#0a1628">超级经济客群是高粘性金矿</h4>
+        <p style="font-size:0.78rem;color:#5a6880;line-height:1.6;margin-top:0.4rem">超级经济舱实际体验者（n=15）表现出惊人的高收入与极高常客忠诚度（93% 拥有常旅客卡），他们在国际短途航线上展现出惊人的统治级使用频次。</p>
+      </div>
+      <div style="border-top:1.5px solid var(--navy);padding-top:0.4rem;font-size:0.75rem;color:var(--navy);font-weight:600">💡 航司启示：超经是金卡锁定器</div>
+    </div>
+    <div class="cd cs" style="height:280px;display:flex;flex-direction:column;justify-content:space-between">
+      <div>
+        <div style="background:rgba(0,163,224,0.08);color:var(--sky2);font-size:10px;font-weight:600;padding:2px 8px;border-radius:2px;width:fit-content;margin-bottom:0.8rem">FINDING 02</div>
+        <h4 style="font-family:var(--font-d);font-size:1.05rem;line-height:1.4;color:#0a1628">超级经济供给存在巨大物理断层</h4>
+        <p style="font-size:0.78rem;color:#5a6880;line-height:1.6;margin-top:0.4rem">超过 38% 的乘客不坐高端经济舱的第一主因是“我坐的航线上根本没有这个舱位”。在受访者中捞不出足量超经人群并非由于兴趣不足，而是供给彻底锁死。</p>
+      </div>
+      <div style="border-top:1.5px solid var(--sky);padding-top:0.4rem;font-size:0.75rem;color:var(--sky2);font-weight:600">💡 航司启示：宽体改装的广阔蓝海</div>
+    </div>
+    <div class="cd cg" style="height:280px;display:flex;flex-direction:column;justify-content:space-between">
+      <div>
+        <div style="background:rgba(224,123,57,0.08);color:var(--amber2);font-size:10px;font-weight:600;padding:2px 8px;border-radius:2px;width:fit-content;margin-bottom:0.8rem">FINDING 03</div>
+        <h4 style="font-family:var(--font-d);font-size:1.05rem;line-height:1.4;color:#0a1628">解耦空间（Legroom）是唯一胜负手</h4>
+        <p style="font-size:0.78rem;color:#5a6880;line-height:1.6;margin-top:0.4rem">消费者所谓的嫌贵（63% 反映性价比低），其本质是抗拒航司将地勤、小食、行李额等软权益虚胖打包。用户唯一死心塌地愿意额外付钱的硬件，唯有“额外腿部开间”。</p>
+      </div>
+      <div style="border-top:1.5px solid var(--amber);padding-top:0.4rem;font-size:0.75rem;color:var(--amber2);font-weight:600">💡 航司启示：摒弃打包，按需单卖</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S4 章节01封面 ═══ -->
+<section class="slide ss" id="s4">
+  <div class="ssn r">01</div>
+  <h2 class="ssT r">旅客画像重塑与<br>精准重新命名</h2>
+  <div class="ssl r"></div>
+  <p class="ssd r">对传统、可能产生命名混淆的舱位定义，重塑为三大高保真客群特征自画像：精明大众、高频中产与臻享高管</p>
+</section>
+
+<!-- ═══ S5 精明大众（原经济舱）画像与付费意愿 ═══ -->
+<section class="slide" id="s5">
+  <p class="ey r">01 · 重塑契群自画像（一）</p>
+  <h2 class="st r">“精明大众客群”：数量极巨但仅对硬质空间偏执</h2>
+  <p class="ki r">该特定客群数量最多（n=170，占57%），只愿单点付费购买硬体空间（腿部空间 3.62分绝对首位），对任何软服务极其价格冷漠。</p>
+  <div class="g2 r" style="margin-top:.8rem">
+    <div style="display:flex;flex-direction:column;justify-content:space-between;height:100%">
+      <div class="persona eco" style="border-top:3px solid var(--navy);margin-bottom:.8rem">
+        <div class="ph">
+          <span class="pbadge">精明大众客群 (Smart Budget Mass)</span>
+          <div class="pname">价格极度敏感 / 重度实用追求</div>
+          <div class="psub">代表原经济舱乘客（57%调研占比）</div>
+        </div>
+        <div class="pb">
+          <div class="pr"><span class="prk">个人月收入中枢</span><span class="prv">1.5万 ~ 2.5万 (56.4%)</span></div>
+          <div class="pr"><span class="prk">常客忠诚覆盖</span><span class="prv" style="color:#c0392b">仅 46% (三组最低)</span></div>
+          <div class="pr"><span class="prk">因公出游偏好</span><span class="prv">100% 恪守经济舱，不愿超支</span></div>
+          <div class="pr"><span class="prk">国际超经年度出游</span><span class="prv hi">0.4 次 (长年物理失缘)</span></div>
+          <div class="pr"><span class="prk">核心诉求</span><span class="prv">时刻频率 > 机型宽体 > 机票低价</span></div>
+        </div>
+      </div>
+      <p class="nt" style="background:rgba(0,32,91,0.03);padding:0.4rem;border-left:2.5px solid var(--navy);margin:0;font-size:0.75rem">
+        <strong>精算定位：</strong>他们并非没有实力。31% 的精明客群月入超过 3万，但这批人坚决抗拒没有实质性、智商税式的空中捆绑溢价。
+      </p>
+    </div>
+    <div class="cd cn">
+      <div class="ctit">“精明大众客群”额外服务加价购买意愿分值 (WTP，1-5)</div>
+      <div class="cw" style="height:210px"><canvas id="c_smart_wtp"></canvas></div>
+      <p class="nt">在不改变舱位基础下，由于空间物理刚需，腿部加宽（3.62分）与餐饮加购（3.40分）是其唯二的自费升级意愿支撑点。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S6 高频商旅中产（原超级经济舱）画像与统治度 ═══ -->
+<section class="slide" id="s6">
+  <p class="ey r">01 · 重塑契群自画像（二）</p>
+  <h2 class="st r">“高频商旅中产”：极高忠诚度与最高出行频度的核心重叠</h2>
+  <p class="ki r">常旅客忠诚度超高达到 93%、月入普遍超 3万——超级经济舱实际人群不是偶遇大众，而是极致粘性的差旅通勤大鳄。</p>
+  <div class="g2 r" style="margin-top:.8rem">
+    <div style="display:flex;flex-direction:column;justify-content:space-between;height:100%">
+      <div class="persona prem" style="border-top:3px solid var(--sky);margin-bottom:.8rem">
+        <div class="ph">
+          <span class="pbadge">高频商旅中产 (High-Frequency Efficiency Elite)</span>
+          <div class="pname">高忠诚高效率 / 差收重度出游</div>
+          <div class="psub">代表原高端经济舱乘客（5%调研占比）</div>
+        </div>
+        <div class="pb">
+          <div class="pr"><span class="prk">个人月收入中枢</span><span class="prv hi-g">3万 ~ 5万 (80%)</span></div>
+          <div class="pr"><span class="prk">常客忠诚卡持有率</span><span class="prv hi-g">93% (三组之中最高)</span></div>
+          <div class="pr"><span class="prk">因公公务出差占比</span><span class="prv hi-g">80% 选择特定的超舱</span></div>
+          <div class="pr"><span class="prk">国际短途超经频次</span><span class="prv hi-g">7.8 次/年 (无可撼动的首位)</span></div>
+          <div class="pr"><span class="prk">核心诉求</span><span class="prv">大客用机型 > App值机便利 > WiFi</span></div>
+        </div>
+      </div>
+      <p class="nt" style="background:rgba(0,163,224,0.06);padding:0.4rem;border-left:2.5px solid var(--sky);margin:0;font-size:0.74rem">
+        <strong>学术科学 caveat 标注：</strong>超级经济舱实际回收样本量虽然受中国航司总体供给匮乏而较小（n=15），但呈现出极度集中的强特征。该群体是重度通勤常客。
+      </p>
+    </div>
+    <div class="cd cs">
+      <div class="ctit">商务通勤统治力：各舱位在不同航线下的平均飞行频度（加权估算折合，次/年）</div>
+      <div class="cw" style="height:190px"><canvas id="c_commute_dom"></canvas></div>
+      <p class="nt" style="font-size:0.68rem;margin-top:0.4rem">
+        <strong>*方法论小注（区间中值计算还原）：</strong> 0次记为0次、1-5次记为中位3次、6-10次记为8次、10次以上记为保守12次折进行平均累计折合。常客中产在超舱短途通勤的频度 7.8次 极度惊人。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S7 臻享体验高管（原商务舱）画像与女性力量 ═══ -->
+<section class="slide" id="s7">
+  <p class="ey r">01 · 重塑契群自画像（三）</p>
+  <h2 class="st r">“臻享体验高管”：坐享最强预算却直击企业报销硬门槛</h2>
+  <p class="ki r">调研中的商务两舱（n=108，占36%）表现出惊人高素质、女性高管居多，随着因公紧缩，降舱成为她们不得不面临的选择。</p>
+  <div class="g2 r" style="margin-top:.8rem">
+    <div style="display:flex;flex-direction:column;justify-content:space-between;height:100%">
+      <div class="persona biz" style="border-top:3px solid var(--amber);margin-bottom:.8rem">
+        <div class="ph">
+          <span class="pbadge">臻享体验高管 (Premium Executive Connoisseurs)</span>
+          <div class="pname">极致体验主义 / 国企高知决策</div>
+          <div class="psub">代表原公务/头等舱乘客（36%调研占比）</div>
+        </div>
+        <div class="pb">
+          <div class="pr"><span class="prk">个人月收入中枢</span><span class="prv">3万 ~ 5万以上占比高达 71%</span></div>
+          <div class="pr"><span class="prk">性别构成偏差</span><span class="prv hi-t">女性占比高达 57% (主流群体)</span></div>
+          <div class="pr"><span class="prk">职业背景组成</span><span class="prv hi-t">国有大企 (25%)、高新合资企业</span></div>
+          <div class="pr"><span class="prk">愿意为增值付Premium</span><span class="prv">85% 的用户愿意为两舱极致体验付10%溢价</span></div>
+          <div class="pr"><span class="prk">常客忠诚卡持有</span><span class="prv">82%</span></div>
+        </div>
+      </div>
+      <p class="nt" style="background:rgba(224,123,57,0.06);padding:0.4rem;border-left:2.5px solid var(--amber);margin:0;font-size:0.75rem">
+        <strong>*She-Economy两舱女性新商旅视角：</strong>女性高管偏好更精致、无噪的空间、高空气质量餐饮等软实力，这些两舱要求在中国目前宽体机超舱配置上并未获得满足。
+      </p>
+    </div>
+    <div class="cd cg">
+      <div class="ctit">“臻享体验高管”加值极致奢华服务愿意支付溢价意愿评分 (WTP，1-5)</div>
+      <div class="cw" style="height:210px"><canvas id="c_executive_wtp"></canvas></div>
+      <p class="nt">对定制菜系点餐（3.78分）与高度封闭全套房（3.77分）极度狂热，传统的两舱地勤加里程已完全无法满足此品味审美。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S8 章节02封面 ═══ -->
+<section class="slide ss" id="s8">
+  <div class="ssn r">02</div>
+  <h2 class="ssT r">航线偏好拆解：<br>彻底拆掉复杂雷达图</h2>
+  <div class="ssl r"></div>
+  <p class="ssd r">解析座椅硬体空间、常旅客偏好的航线跨度分布，以单极、利落的柱状图揭秘用户第一诉求</p>
+</section>
+
+<!-- ═══ S9 偏好底物：座椅是唯一不分阶层的天字第一号刚需 ═══ -->
+<section class="slide" id="s9">
+  <p class="ey r">02 · 各航线舱位选择金字塔</p>
+  <h2 class="st r">客舱选择偏好：座椅舒适度占据统治高地</h2>
+  <p class="ki r">原复杂的偏好雷达图，通过解耦极简，可以极其明显地看到：座椅硬物理舒适度（3.67分）以绝对优势荣登首选大关，软科技无济于事。</p>
+  <div class="g2 r" style="margin-top:.8rem">
+    <div class="cd cn">
+      <div class="ctit">300位受访常飞乘客对于“航餐/机型偏好选择因素”重要度排序（总体分值，五分制）</div>
+      <div class="cw" style="height:260px"><canvas id="c_simple_preference_bar"></canvas></div>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:space-between;height:100%">
+      <div class="ib ib-n" style="margin-top:0">
+        <strong>第一黄金痛点：座椅的硬物理属性</strong>
+        <p style="font-size:0.8rem;color:#4a5a70;line-height:1.6;margin-top:0.3rem">全航线乘客（包括国内与海外长短途）不约而同地把“座椅舒适度（3.67分）”列为第一核心考量。软化措施如小巧礼品盒、高空极速WiFi根本无法抚慰基本长达4小时大腿承托、靠窗腿部狭小带来的物理窒息感。</p>
+      </div>
+      <div class="ib ib-t" style="margin-top:0.8rem">
+        <strong>行业反直觉：国内乘客比长途更在乎“大宽体机型”</strong>
+        <p style="font-size:0.8rem;color:#4a5a70;line-height:1.6;margin-top:0.3rem">数据发现：国内航线大飞机窄窄体机重要性分值为3.54分，而国际长途仅为3.18分。国内常飞人群对航司“国内航线宽体大客机升舱”有异于常理的热切期盼，配置宽体机会产生极强买票决策干扰。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S10 阻碍解码：经济舱嫌贵背后的真实原因 ═══ -->
+<section class="slide" id="s10">
+  <p class="ey r">02 · 超舱阻碍分流解密（精明大众）</p>
+  <h2 class="st r">“精明大众”为何未选：大礼包捆绑定价放大了“嫌贵”心智</h2>
+  <p class="ki r">通过剔除其余舱位干扰，只保留精明客群（n=88）听说未坐的数据，不选首因：价格偏高（62.5%）与性价比低（61.4%）。</p>
+  <div class="g2 r" style="margin-top:.8rem">
+    <div class="cd cn">
+      <div class="ctit">“精明大众（原经济舱）”放弃并抗拒购买高端经济舱首位原由（百分比占比）</div>
+      <div class="cw" style="height:250px"><canvas id="c_mass_barriers_bar"></canvas></div>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:space-between;height:100%">
+      <div class="ib ib-n" style="margin-top:0">
+        <strong>买超舱，其实不是买“豪华”</strong>
+        <p style="font-size:0.8rem;color:#4a5a70;line-height:1.6;margin-top:0.3rem">传统超级经济舱的溢价幅度极大，通常比经济舱贵50% - 100%。航司往往将优先通道、加大餐食、额外行李打包销售，但这群精明客户在长途差旅中**根本不在意那些小恩小惠的餐饮，只是需要单纯加宽的舒适座椅（Legroom）**。过度捆绑包装放大了“贵、不值”的心智。</p>
+      </div>
+      <div class="ib ib-t" style="margin-top:0.8rem">
+        <strong>供给物理屏蔽：不愿买，不如“想买没地买”</strong>
+        <p style="font-size:0.8rem;color:#4a5a70;line-height:1.6;margin-top:0.3rem">有高达 36.4% 的大众受众直指不买超舱是因为“我常飞的航线、大客流航班上**根本就没有配置这个高端级别**”。物理供给侧的失落成为航司大面积丢失收益的最大物理墙壁。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S11 阻碍解码：两舱嫌超舱“太水”背后的心理预期 ═══ -->
+<section class="slide" id="s11">
+  <p class="ey r">02 · 超舱阻碍分流解密（臻享高管）</p>
+  <h2 class="st r">两舱体验者：超经“太像经济舱”后的高管心理不满足</h2>
+  <p class="ki r">与精算经济舱不同，高管决策层的核心痛点是超舱“无法提供所需的服务标准（25.6%比经济高11%）”、觉得其产品“过于平庸”。</p>
+  <div class="g2 r" style="margin-top:.8rem">
+    <div class="cd cs">
+      <div class="ctit">“臻享体验高管（两舱）”不愿降舱或增购超级经济舱的重要阻碍障碍分布</div>
+      <div class="cw" style="height:250px"><canvas id="c_executive_barriers_bar"></canvas></div>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:space-between;height:100%">
+      <div class="ib ib-g" style="margin-top:0">
+        <strong>服务鸿沟：超经目前的“四不像”尴尬</strong>
+        <p style="font-size:0.8rem;color:#4a5a70;line-height:1.6;margin-top:0.4rem">
+          国营、外企高端两舱主管不愿考虑目前的超经，其首因核心在“无法满足对应专属的两舱尊贵感知（25.6%）”和“跟传统标准经济舱没大区别（48.8%）”。
+          <br><br>
+          国内大多数航司的超经往往仅仅是把大客机头几排隔出来的普通窄距座位，毫无私密格板遮挡，也无地面高端柜台值机，导致其在降级浪潮中难以承接两舱被拦截的客群。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S12 航线变现海口：3-6小时国际短深空 ═══ -->
+<section class="slide" id="s12">
+  <p class="ey r">02 · 变现核心切入航线</p>
+  <h2 class="st r">黄金切入口：3h ~ 6h国际短途航线对舒适的付费最强烈</h2>
+  <p class="ki r">一反大众认为“长途越洋飞行才愿意多付钱”的常识——在短途国际（如日韩/新马泰）上，由于身体刚需，付费空间大开。</p>
+  <div class="g2 r" style="margin-top:.8rem">
+    <div class="cd ct">
+      <div class="ctit">三大类型主流直达航线在“腿部空间”付费愿意中枢（五分制WTP）</div>
+      <div class="cw" style="height:245px"><canvas id="c_wtp_by_routes_compare"></canvas></div>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:space-between;height:100%">
+      <div class="ib ib-n" style="margin-top:0">
+        <strong>黄金短长两宽：3-6小时超强付费力</strong>
+        <p style="font-size:0.8rem;color:#4a5a70;line-height:1.6;margin-top:0.4rem">
+          在国际短途（东亚/东南亚）大面积因商务出海飞行的客户，其“多余腿部（3.62分）”与“高级特制空中餐（3.40分）”均问鼎整张表最高分。
+          <br><br>
+          在全组比对中，我们还意外发现：超舱金常中产在这个黄金深空下的出访通勤高达**惊人7.8次/年**。这一航线应作为空客宽体大机舱改装的第一战略主推路线。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S13 章节03封面 ═══ -->
+<section class="slide ss" id="s13">
+  <div class="ssn r">03</div>
+  <h2 class="ssT r">十载时空追踪对比：<br>2016 vs 2026 见微知著</h2>
+  <div class="ssl r"></div>
+  <p class="ssd r">直接以大方双历时横条，向空客团队展示消费者这十年来发生的两千项心理结构迁移</p>
+</section>
+
+<!-- ═══ S14 十年认知跨越：中国天空跨过“对超级经济舱闻所未闻的盲区” ═══ -->
+<section class="slide" id="s14">
+  <p class="ey r">03 · 十年两端纵向变迁之一</p>
+  <h2 class="st r">启智大幕已落：从未听过超级经济舱的红利消散</h2>
+  <p class="ki r">2016年，有高达30.0%的中国乘客直呼“完全不知道什么是超经”；十年间大宣传下，该红线2026年速降到了17.0%。</p>
+  <div class="g2 r" style="margin-top:.8rem">
+    <div class="cd cn">
+      <div class="ctit">十年对比：中国大众“完全不了解高端超级经济舱”的比率迁徙（%）</div>
+      <div class="cw" style="height:230px"><canvas id="c_educate_decade_bar_simple"></canvas></div>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:space-between;height:100%">
+      <div class="ib ib-n" style="margin-top:0">
+        <strong>大科普时代谢幕，市场红利从“扩人头”跌下“重转化”</strong>
+        <p style="font-size:0.8rem;color:#4a5a70;line-height:1.6;margin-top:0.4rem">
+          认知死角的消融（17.0%的剩余不解），这表明如果十年航空在超舱购买上无法完成突破，**绝对不是因为“国人不认得它，买不到是因为心智不足”**。
+          <br><br>
+          消费者已经跨过了好奇的观望河畔。买或不买的战场，已经100%转移到产品物理升级、性价比折旧、以及报销账单设计是不是得体真实的落地考验。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S15 十年障碍如山：嫌贵与不值这尊冰山大底纹丝不动 ═══ -->
+<section class="slide" id="s15">
+  <p class="ey r">03 · 十年两端纵向变迁之二</p>
+  <h2 class="st r">性价比天堑：性价比偏低硬核障碍历经十年不减反增</h2>
+  <p class="ki r">对比2016年空客原装纸面调查，性价比过低障碍从62%上浮至今朝63%，中国金常差旅客群已经不愿再为多出的“几寸大前排”多耗白银。</p>
+  <div class="g2 r" style="margin-top:.8rem">
+    <div class="cd cn">
+      <div class="ctit">听说但未乘坐乘客之放弃原由 2016 vs 2026 十年分流双时间图 (%)</div>
+      <div class="cw" style="height:250px"><canvas id="c_simple_decade_compare"></canvas></div>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:space-between;height:100%">
+      <div class="ib ib-g" style="margin-top:0">
+        <strong>乘客不当傻子：十年见，体验水分原形毕露</strong>
+        <p style="font-size:0.8rem;color:#4a5a70;line-height:1.6;margin-top:0.4rem">
+          “性价比低（63%）”与“价格过高（61%）”高悬障碍前二名。相较于十年前中国暴涨的经济体能，2026 乘客已经对所谓超额包装的商务冷食点水服务失去所有幻想。如果不能进行单点极致硬体的“实质性空间让路”，超超多出来的几千块溢价在差旅紧缩下会被理智无情抛弃。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S16 章节04封面 ═══ -->
+<section class="slide ss" id="s16">
+  <div class="ssn r">04</div>
+  <h2 class="ssT r">空中突围行动方案：<br>空客赋能航司的黄金钥匙</h2>
+  <div class="ssl r"></div>
+  <p class="ssd r">针对精明大众下沉破冰、应对臻享高管阻碍，提出真实有效的高低端解耦、双账单微信二段合规付款行动要向建议</p>
+</section>
+
+<!-- ═══ S17 下沉大招：解密按需解耦剥离 basic 裸座椅 ═══ -->
+<section class="slide" id="s17">
+  <p class="ey r">04 · 突围建议一（精明大众下沉）</p>
+  <h2 class="st r">破冰建议：推出无包装裸超座椅 (Unbundled Premium)</h2>
+  <p class="ki r">直接对焦 2026 达美 Comfort Basic 顶级创例：彻底粉碎虚假捆绑，只卖高舒适座椅 Legroom，剥离无用周边。</p>
+  <div class="rec-grid r" style="margin-top:.8rem">
+    <div class="rec-card">
+      <div class="rec-header">
+        <div style="width:10px;height:10px;background:var(--sky);border-radius:50%"></div>
+        <div class="rec-title">2026 达美 & 美联航分拆实践 (同行先路)</div>
+      </div>
+      <div class="rec-item"><strong>Comfort Basic 极客舱位</strong>：Delta 针对商务收紧正式推出的 Basic Premium。该大招保证了登机口的极度裸座（没有免费改签、没有提前挑座、没有专属餐饮包），价格暴跌30%。</div>
+      <div class="rec-item"><strong>立竿见影的转化红利</strong>：将有商务刚需但报销底门卡住的精明人群（WTP 座椅舒适 3.62分绝对首位，餐食不关己），以最低上机门槛吸纳。</div>
+    </div>
+    <div class="rec-card">
+      <div class="rec-header">
+        <div style="width:10px;height:10px;background:var(--amber);border-radius:50%"></div>
+        <div class="rec-title">跨行业 iPhone or iPad 高频解耦示范</div>
+      </div>
+      <div class="rec-item"><strong>裸硬体刚需单买</strong>：Apple 在 20W 充电、手写有线无线耳机上的解耦，实质上降低了高品质机身屏幕（核心座椅）的第一门槛，周边按需自费购买。</div>
+      <div class="rec-item"><strong>对航司的产品落地</strong>：超经基础包（Legroom ONLY） + 优先值机（50元/次） + 高级餐升级（50元/次） + WiFi单买，大幅解放被价格拦截并觉得性价比不力的 63% 精飞流高频大众。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S18 升上大招：隐开合账让金常中高管报销顺畅 ═══ -->
+<section class="slide" id="s18">
+  <p class="ey r">04 · 突围建议二（两舱硬防 downgrade）</p>
+  <h2 class="st r">合规神计：打通因公报销与因私自费常旅客积分隐形升级</h2>
+  <p class="ki r">应对 93% 的超舱乘客是常飞金卡这个核心。企业拒绝公务舱账单，那就让个人里程或者私人微信二段在后台付款结算。</p>
+  <div class="g2 r" style="margin-top:.8rem">
+    <div class="cd cn">
+      <div class="ctit">“两段式隐形升级套件”运作模型原理</div>
+      <div style="display:flex;flex-direction:column;gap:0.75rem;margin-top:0.6rem">
+        <div style="display:flex;align-items:flex-start;gap:0.5rem;font-size:0.78rem">
+          <span style="font-weight:600;background:var(--navy);color:#fff;padding:2px 6px;border-radius:3px">前端单据</span>
+          <p style="color:#4a5a70;line-height:1.5"><strong>企业正常差旅机票报销端</strong>：开出纯粹的“经典经济舱 Y 舱/基础 W 舱”收据单。面额合规，一枪穿透严苛至极的国企或政企差旅报销安全审计限制。</p>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:0.5rem;font-size:0.78rem">
+          <span style="font-weight:600;background:var(--sky);color:#fff;padding:2px 6px;border-radius:3px">移动秒充</span>
+          <p style="color:#4a5a70;line-height:1.5"><strong>常客个人 App / 登机机舱一键隐形付款</strong>：值机或登机柜台，飞客可以直接选择用他积压的**个人里程（超高 93% 常客浓度）积分**或个人私人微信钱包自费 150-300 元解锁“实质隔板的真高端超经”。</p>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:space-between;height:100%">
+      <div class="ib ib-g" style="margin-top:0">
+        <strong>金常飞客对“二段自费付费”极高的赞同倾向</strong>
+        <p style="font-size:0.8rem;color:#4a5a70;line-height:1.6;margin-top:0.3rem">
+          利用本组关于常客常旅客的强粘特征（超舱中产 93% 为常客，高达 53.3% 认为常旅客起决定决策影响），打通这个合规暗道，能成功锁牢面临两舱断崖下降、被差旅政策卡住喉咙的高级高管，使高净值客户高空舒适不降级。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S19 大总结：白皮书 executive summary 核心推荐定位表格 ═══ -->
+<section class="slide" id="s19">
+  <p class="ey r">白皮书 Executive Summary 收官</p>
+  <h2 class="st r">2026年航空空中突围战略推荐卡片格子表</h2>
+  <p class="ki r">用清晰可鉴的垂直麦肯锡咨询矩阵，为中国超经舱位定制的精细产品推荐蓝图。</p>
+  <div class="g2 r" style="margin-top:.8rem">
+    <div class="cd cn" style="padding:1.2rem">
+      <div class="rec-header">
+        <div style="width:10px;height:10px;background:var(--navy);border-radius:50%"></div>
+        <div class="rec-title" style="font-size:1.05rem">精明大众客群（下沉破冰大战略）</div>
+      </div>
+      <div class="rec-item"><strong>目标痛点</strong>：对超经的溢价嫌贵（62.5%），但愿意为长途腿部空间付费（3.62分）。</div>
+      <div class="rec-item"><strong>一句话策略</strong>：<strong>“物理空间裸售 (Legroom-Only Basic)”</strong>。</div>
+      <div class="rec-item"><strong>具体设计推荐</strong>：将传统超经降价解耦，提供相比普通经济仅加价 20% 但纯无行李餐饮软特权的单纯宽敞座椅包。</div>
+    </div>
+    <div class="cd cs" style="padding:1.2rem">
+      <div class="rec-header">
+        <div style="width:10px;height:10px;background:var(--sky);border-radius:50%"></div>
+        <div class="rec-title" style="font-size:1.05rem">臻享体验高管（防守降级大战略）</div>
+      </div>
+      <div class="rec-item"><strong>目标痛点</strong>：嫌弃现在的超经四不像、体验太水（地面无尊享、舱内无隔板私密）。</div>
+      <div class="rec-item"><strong>一句话策略</strong>：<strong>“企业报销合规升级 (Dual-Bill Compliance)”</strong>。</div>
+      <div class="rec-item"><strong>具体设计推荐</strong>：将超经增加硬质塑料高立板私密遮掩（中产3.77分套房狂热），同时开辟两段付款路，让个人用常客个人里程直接在后台免审批微信升舱。</div>
+    </div>
+  </div>
+  <p class="nt" style="text-align:center;margin-top:1.2rem;color:var(--navy)">
+    *研究受限重点澄清：高频常客中产（n=15，样本量偏低），其全部得比 10 次以上设定中值 12 次/年折出 7.8次 进行严谨论证。
+  </p>
+</section>
+
+<!-- ═══ S20 感谢结尾 ═══ -->
+<section class="slide" id="s_end" style="background:var(--navy2)">
+  <svg style="position:absolute;right:0;top:0;bottom:0;width:45%;opacity:.07" viewBox="0 0 400 600" fill="none">
+    <path d="M400 300L0 580V480L340 240Z" fill="white"/>
+    <path d="M400 300L0 480V380L380 270Z" fill="white" opacity=".5"/>
+    <path d="M400 300L50 0H150L400 280Z" fill="white" opacity=".28"/>
+  </svg>
+  <div style="position:relative;z-index:1">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.5rem" class="r">
+      <div class="abadge"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M2 14L22 8L20 12L8 16Z" fill="white"/><path d="M2 14L10 18L8 16Z" fill="white" opacity=".55"/></svg></div>
+      <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.35)">Airbus × Tsinghua University</span>
+    </div>
+    <h2 class="cvT r" style="font-size:clamp(1.7rem,3.2vw,2.8rem)">感谢空客团队<br>每位评阅老师的<br>现场指导与聆听</h2>
+    <p class="cvS r" style="max-width:46ch">本研白皮书基于 2026 年 5 月全国核心 25-54 岁重度飞飞主力常旅客（61%高渗透率，n=300）的真实数据库。所有底层数理、区间代位演算全部在 Gitee 与 Airbus 留有完全开放案头底稿。谢谢大家！</p>
+    <div class="cvL r"></div>
+    <p class="cvM r">China Cabin Preference Study 2026 · Presentation Report · Tsinghua EMBA Business Analytics</p>
+    <div style="margin-top:1.8rem;padding-top:1.6rem;border-top:1px solid rgba(255,255,255,.08);display:flex;gap:3rem;align-items:flex-end" class="r">
+      <div>
+        <div style="font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.25);margin-bottom:.4rem">汇报团队</div>
+        <div style="font-family:'Clash Display','PingFang SC',sans-serif;font-size:.95rem;font-weight:600;color:rgba(255,255,255,.75);letter-spacing:.02em">赵婧怡 &nbsp;·&nbsp; 欧子聪 &nbsp;·&nbsp; 吴哲维</div>
+      </div>
+      <div>
+        <div style="font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.25);margin-bottom:.4rem">课程</div>
+        <div style="font-size:.82rem;color:rgba(255,255,255,.4)">商务分析整合实践</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+const slides=document.querySelectorAll('.slide');
+const navEl=document.getElementById('nav');
+const barEl=document.getElementById('bar');
+slides.forEach((_,i)=>{const d=document.createElement('div');d.className='nd';d.onclick=()=>slides[i].scrollIntoView({behavior:'smooth'});navEl.appendChild(d);});
+const nds=document.querySelectorAll('.nd');
+let cur=0;
+const obs=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      const i=[...slides].indexOf(e.target);
+      barEl.style.width=`${((i+1)/slides.length*100).toFixed(1)}%`;
+      nds.forEach((d,di)=>d.classList.toggle('on',di===i));
+      e.target.querySelectorAll('.r').forEach(el=>el.classList.add('on'));
+      cur=i;
+    }
+  });
+},{threshold:0.05}); // Lowered threshold from 0.3 to 0.05 for perfect low-resolution screen compatibility
+
+// Crucial: Active-on-load fallback for the first slide (resolves initial empty/blank slide issue)
+document.addEventListener('DOMContentLoaded', () => {
+  const firstSlide = document.querySelector('.slide');
+  if (firstSlide) {
+    firstSlide.querySelectorAll('.r').forEach(el => el.classList.add('on'));
+    if (nds[0]) nds[0].classList.add('on');
+    if (barEl) barEl.style.width = `${(1 / slides.length * 100).toFixed(1)}%`;
+  }
+});
+
+slides.forEach(s=>obs.observe(s));
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowDown'||e.key===' '){e.preventDefault();cur=Math.min(cur+1,slides.length-1);slides[cur].scrollIntoView({behavior:'smooth'});}
+  else if(e.key==='ArrowUp'){e.preventDefault();cur=Math.max(cur-1,0);slides[cur].scrollIntoView({behavior:'smooth'});}
+});
+
+const NAVY='#00205b',SKY='#00a3e0',GOLD='#c9a84c',TEAL='#00857c',RED='#c0392b',GRAY='#9aa0b0',SKY2='#0078b4',GOLD2='#a07828';
+const gc='rgba(0,32,91,0.07)',tc='#8a9ab0';
+const C1=NAVY,C2=SKY,C3='#e07b39';
+
+const baseTooltip={backgroundColor:'#00205b',titleColor:'rgba(255,255,255,0.55)',bodyColor:'#fff',padding:10,cornerRadius:4,displayColors:true,boxWidth:10,boxHeight:10,borderColor:'rgba(0,163,224,0.35)',borderWidth:1};
+
+const hbar=(xmin,xmax,cb)=>({responsive:true,maintainAspectRatio:false,indexAxis:'y',
+  plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.x.toFixed(1)}`+(cb||'')}}},
+  scales:{x:{min:xmin,max:xmax,grid:{color:gc},ticks:{color:tc,font:{size:9},callback:v=>v.toFixed(1)}},
+          y:{grid:{display:false},ticks:{color:tc,font:{size:9}}}}});
+
+function initCharts(){
+
+/* S4/S5 收入对比 分组竖条 */
+new Chart('c_income3',{type:'bar',data:{
+  labels:['<5k','5k-1w','1w-1.5w','1.5w-2w','2w-3w','3w-5w','>5w'],
+  datasets:[
+    {label:'精明大众',data:[13.5,6.5,7.1,13.5,28.2,21.8,9.4],backgroundColor:C1,borderRadius:2},
+    {label:'高频商旅中产',data:[0,0,0,0,20,60,20],backgroundColor:C2,borderRadius:2},
+    {label:'臻享体验高管',data:[0,0,0,0,29.6,47.2,23.1],backgroundColor:C3,borderRadius:2}
+  ]
+},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:tc,font:{size:11},boxWidth:10,padding:8}},tooltip:{...baseTooltip,callbacks:{label:ctx=>`${ctx.dataset.label}  ${ctx.parsed.y.toFixed(1)}%`}}},
+  scales:{x:{grid:{display:false},ticks:{color:tc,font:{size:9},autoSkip:false,maxRotation:0}},
+          y:{grid:{color:gc},ticks:{color:tc,font:{size:9},callback:v=>v+'%'},max:65}}}});
+
+/* S5 Smart Budget Mass WTP (纯单极条形图柱，彻底简单) */
+new Chart('c_smart_wtp',{type:'bar',data:{
+  labels:['额外腿部空间','餐饮升级包','优先选座(Preferred)','提前自助值机','机上高速WiFi','额外行李额度'],
+  datasets:[{
+    data:[3.62, 3.40, 3.30, 3.22, 3.12, 3.10],
+    backgroundColor:[C2, C2, C1+'44', C1+'44', C1+'44', C1+'44'],
+    borderRadius:2
+  }]
+},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+  plugins:{legend:{display:false},tooltip:{...baseTooltip,callbacks:{label:ctx=>` 意愿分: ${ctx.parsed.x.toFixed(2)}`}}},
+  scales:{x:{min:2.5,max:3.8,grid:{color:gc},ticks:{color:tc,font:{size:9}}},
+          y:{grid:{display:false},ticks:{color:tc,font:{size:10}}}}}});
+
+/* S6 各旅客群体国际短途超经通勤出行热度比较 */
+new Chart('c_commute_dom',{type:'bar',data:{
+  labels:['精明大众客群','臻享体验高管','高频商旅中产(n=15)'],
+  datasets:[{
+    data:[0.4, 2.5, 7.8],
+    backgroundColor:[C1+'44', C3+'77', C2],
+    borderRadius:2,
+    barThickness:25
+  }]
+},options:{responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{...baseTooltip,callbacks:{label:ctx=>` 国际短途超经出行: $^{ctx.parsed.y.toFixed(1)} 次/年`}}},
+  scales:{x:{grid:{display:false},ticks:{color:tc,font:{size:10}}},
+          y:{grid:{color:gc},ticks:{color:tc,font:{size:9},callback:v=>v+'次'}}}}});
+
+/* S7 Executive WTP */
+new Chart('c_executive_wtp',{type:'bar',data:{
+  labels:['定制化点餐式餐饮','升级全封闭独立套房','全球极速高速WiFi','双人套房预订','专属空中一对一管家','高阶影后VR娱乐'],
+  datasets:[{
+    data:[3.78, 3.77, 3.52, 3.48, 3.40, 3.20],
+    backgroundColor:[C3, C3, C1+'44', C1+'44', C1+'44', C1+'44'],
+    borderRadius:2
+  }]
+},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+  plugins:{legend:{display:false},tooltip:{...baseTooltip,callbacks:{label:ctx=>` 两舱愿意加价倾向: ${ctx.parsed.x.toFixed(2)}`}}},
+  scales:{x:{min:2.5,max:3.9,grid:{color:gc},ticks:{color:tc,font:{size:9}}},
+          y:{grid:{display:false},ticks:{color:tc,font:{size:10}}}}}});
+
+/* S9 Simple Preference Bar (彻底消灭复杂雷达图) */
+new Chart('c_simple_preference_bar',{type:'bar',data:{
+  labels:['座椅舒适度','常旅客计划积累','飞机机型宽窄体','时刻与航班频率','客舱无噪极净环境','机场品牌与声誉','优质特色餐饮服务','机场行李架空间','机上高速WiFi设备','优先登机登桥特权'],
+  datasets:[{
+    data:[3.67, 3.54, 3.43, 3.39, 3.36, 3.33, 3.31, 3.29, 3.24, 3.12],
+    backgroundColor:[C2, C1+'aa', C1+'aa', C1+'aa', C1+'aa', C1+'aa', C1+'aa', C1+'aa', C1+'aa', C1+'aa'],
+    borderRadius:2
+  }]
+},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+  plugins:{legend:{display:false},tooltip:{...baseTooltip,callbacks:{label:ctx=>` 重要性打分: ${ctx.parsed.x.toFixed(2)}`}}},
+  scales:{x:{min:2.8,max:3.8,grid:{color:gc},ticks:{color:tc,font:{size:9}}},
+          y:{grid:{display:false},ticks:{color:tc,font:{size:9.5}}}}}});
+
+/* S10 精明大众超级经济舱第一重拦截障碍 (单雷达解耦柱状图) */
+new Chart('c_mass_barriers_bar',{type:'bar',data:{
+  labels:['性价比不划算','机票价格太高','觉得没有必要购买','航班上根本没配超经','觉得跟经济舱没差别','由于完全不了解超经','服务不合出行需要'],
+  datasets:[{
+    data:[61.4, 62.5, 48.9, 36.4, 40.9, 18.2, 14.8],
+    backgroundColor:[C1, C1, C1+'55', C2, C1+'55', C1+'33', C1+'33'],
+    borderRadius:2
+  }]
+},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+  plugins:{legend:{display:false},tooltip:{...baseTooltip,callbacks:{label:ctx=>` 占比: ${ctx.parsed.x.toFixed(1)}%`}}},
+  scales:{x:{min:0,max:75,grid:{color:gc},ticks:{color:tc,font:{size:9},callback:v=>v+'%'}},
+          y:{grid:{display:false},ticks:{color:tc,font:{size:10}}}}}});
+
+/* S11 两舱高管升级超舱重要障碍 */
+new Chart('c_executive_barriers_bar',{type:'bar',data:{
+  labels:['客观性价比太低','价格依旧过高','两舱跟超舱毫无差别','觉得公务出差没必要','物理机队没配备超仓','无法保障对应的服务','对该产品不甚了解'],
+  datasets:[{
+    data:[62.8, 58.1, 48.8, 48.8, 37.2, 25.6, 16.3],
+    backgroundColor:[C3, C3, C3+'77', C1+'44', C1+'44', C3, C1+'44'],
+    borderRadius:2
+  }]
+},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+  plugins:{legend:{display:false},tooltip:{...baseTooltip,callbacks:{label:ctx=>` 占比: ${ctx.parsed.x.toFixed(1)}%`}}},
+  scales:{x:{min:0,max:75,grid:{color:gc},ticks:{color:tc,font:{size:9},callback:v=>v+'%'}},
+          y:{grid:{display:false},ticks:{color:tc,font:{size:10}}}}}});
+
+/* S12 国际国内分类腿部付费意愿比较图 */
+new Chart('c_wtp_by_routes_compare',{type:'bar',data:{
+  labels:['国内直达航线(n=102)','国际短途航距离(n=40)','国际长途距离航(n=27)'],
+  datasets:[{
+    data:[3.37, 3.62, 3.19],
+    backgroundColor:[C1+'ee', C2, C3+'bb'],
+    borderRadius:2,
+    barThickness:25
+  }]
+},options:{responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{...baseTooltip,callbacks:{label:ctx=>` 空间溢价自付愿意: ${ctx.parsed.y.toFixed(2)}`}}},
+  scales:{x:{grid:{display:false},ticks:{color:tc,font:{size:11.5}}},
+          y:{min:2.8,max:3.8,grid:{color:gc},ticks:{color:tc,font:{size:9}}}}});
+
+/* S14 2016 vs 2026 “完全闻所未闻超级经济舱” 相比大转变 */
+new Chart('c_educate_decade_bar_simple',{type:'bar',data:{
+  labels:['2016年调查实况','2026年今日现状'],
+  datasets:[{
+    data:[30.0, 17.0],
+    backgroundColor:[GRAY, C2],
+    borderRadius:2,
+    barThickness:40
+  }]
+},options:{responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{...baseTooltip,callbacks:{label:ctx=>` “全不了解该舱”比例: ${ctx.parsed.y.toFixed(1)}%`}}},
+  scales:{x:{grid:{display:false},ticks:{color:tc,font:{size:11.5}}},
+          y:{min:0,max:40,grid:{color:gc},ticks:{color:tc,font:{size:9},callback:v=>v+'%'}}}}});
+
+/* S15 未选原因对比 分组横条 2016 vs 2026 */
+new Chart('c_simple_decade_compare',{type:'bar',data:{
+  labels:['性价比不高','机票价格太大','出港航班没有超舱','觉得跟普通经济类似','主观觉得没必要','产品服务水平太劣势','由于完全听不懂它'],
+  datasets:[
+    {label:'2016历史 (Airbus 存档)',data:[62.0, 58.0, 35.0, 38.0, 45.0, 15.0, 30.0],backgroundColor:GRAY,borderRadius:2},
+    {label:'2026现状 (本组数模)',data:[63.0, 61.0, 38.0, 42.0, 49.0, 19.0, 17.0],backgroundColor:C2,borderRadius:2}
+  ]
+},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+  plugins:{legend:{labels:{color:tc,font:{size:10},boxWidth:10,padding:8},position:'bottom'},tooltip:{...baseTooltip,callbacks:{label:ctx=>`${ctx.dataset.label}  ${ctx.parsed.x.toFixed(1)}%`}}},
+  scales:{x:{min:0,max:75,grid:{color:gc},ticks:{color:tc,font:{size:8},callback:v=>v+'%'}},
+          y:{grid:{display:false},ticks:{color:tc,font:{size:9}}}}}});
+
+}
+
+if(window.Chart){initCharts();}else{document.querySelector('script[src*="chart"]').addEventListener('load',initCharts);}
+</script>
+</body>
+</html>
